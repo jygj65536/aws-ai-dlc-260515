@@ -26,7 +26,7 @@ export function TableCard({
   return (
     <button
       onClick={onClick}
-      className={`card text-left w-full hover:shadow-md transition-shadow ${
+      className={`card text-left w-full h-48 flex flex-col hover:shadow-md transition-shadow ${
         isNew ? 'ring-2 ring-primary-400 animate-pulse' : ''
       }`}
       data-testid={`dashboard-table-card-${tableId}`}
@@ -40,7 +40,7 @@ export function TableCard({
         </div>
       </div>
 
-      <div className="space-y-1 mb-3">
+      <div className="flex-1 overflow-hidden space-y-1 mb-3">
         {orders.slice(0, 3).map((order) => (
           <div key={order.order_id} className="text-xs text-gray-600 truncate">
             #{order.order_number} - {order.items.map((i) => i.name).join(', ')}
@@ -51,7 +51,7 @@ export function TableCard({
         )}
       </div>
 
-      <div className="border-t border-gray-100 pt-2">
+      <div className="border-t border-gray-100 pt-2 mt-auto">
         <span className="text-sm font-semibold text-gray-900">{formattedTotal}원</span>
       </div>
     </button>
