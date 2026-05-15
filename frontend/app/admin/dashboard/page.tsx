@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const [sseConnected, setSseConnected] = useState(false);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const sseClientRef = useRef<SSEClient | null>(null);
+  const tableNumberMapRef = useRef<Map<string, number>>(new Map());
 
   const fetchData = useCallback(async () => {
     try {
@@ -39,6 +40,7 @@ export default function DashboardPage() {
 
       const tableMap = new Map<string, TableData>();
       tablesData.forEach((t) => {
+        tableNumberMapRef.current.set(t.table_id, t.table_number);
         tableMap.set(t.table_id, {
           tableId: t.table_id,
           tableNumber: t.table_number,
@@ -86,7 +88,7 @@ export default function DashboardPage() {
             ...prev,
             {
               tableId: order.table_id,
-              tableNumber: 0, // 새 테이블은 다음 fetch에서 업데이트
+              tableNumber: tableNumberMapRef.current.get(order.table_id) ?? 0,
               orders: [order],
               totalAmount: order.total_amount,
               hasNewOrder: true,
