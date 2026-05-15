@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-15T09:00:00Z
-- **Current Stage**: CONSTRUCTION - Code Generation (Frontend Complete) → Build and Test (Next)
+- **Current Stage**: CONSTRUCTION - Code Generation (In Progress - Backend Order)
 
 ## Execution Plan Summary
 - **Total Stages**: 9 (실행 완료 + 실행 예정)
@@ -35,7 +35,8 @@
 - [x] INCEPTION - Application Design
 - [x] INCEPTION - Units Generation
 - [x] CONSTRUCTION - Functional Design (EXECUTE, per-unit)
-- [x] CONSTRUCTION - Code Generation (EXECUTE, per-unit)
+- [x] CONSTRUCTION - Code Generation - Backend Order (feature/order 브랜치)
+- [ ] CONSTRUCTION - Code Generation - 나머지 유닛 (다른 브랜치)
 - [ ] CONSTRUCTION - Build and Test (EXECUTE)
 - CONSTRUCTION - NFR Requirements (SKIP)
 - CONSTRUCTION - NFR Design (SKIP)
