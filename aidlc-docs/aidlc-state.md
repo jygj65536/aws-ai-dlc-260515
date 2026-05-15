@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-15T09:00:00Z
-- **Current Stage**: INCEPTION - Workflow Planning (Complete)
+- **Current Stage**: INCEPTION - Units Generation (Complete)
 
 ## Execution Plan Summary
 - **Total Stages**: 6 (실행 대상)
@@ -31,8 +31,8 @@
 - [x] INCEPTION - Requirements Analysis
 - [x] INCEPTION - User Stories
 - [x] INCEPTION - Workflow Planning
-- [ ] INCEPTION - Application Design (EXECUTE)
-- [ ] INCEPTION - Units Generation (EXECUTE)
+- [x] INCEPTION - Application Design (EXECUTE)
+- [x] INCEPTION - Units Generation (EXECUTE)
 - [ ] CONSTRUCTION - Functional Design (EXECUTE, per-unit)
 - [ ] CONSTRUCTION - NFR Requirements (SKIP)
 - [ ] CONSTRUCTION - NFR Design (SKIP)
