@@ -1,9 +1,11 @@
-"""FastAPI 의존성 주입 모듈 (인증/인가)."""
+"""FastAPI 의존성 주입 모듈 (인증/인가 + 서비스)."""
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.security import decode_access_token
+from app.services.order_service import OrderService
+from app.services.sse_manager import sse_manager, SSEManager
 
 security_scheme = HTTPBearer()
 
@@ -84,3 +86,13 @@ def require_store_match(store_id: str, current_user: dict) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="해당 매장에 대한 접근 권한이 없습니다",
         )
+
+
+def get_order_service() -> OrderService:
+    """OrderService 인스턴스 반환."""
+    return OrderService()
+
+
+def get_sse_manager() -> SSEManager:
+    """SSEManager 싱글톤 반환."""
+    return sse_manager

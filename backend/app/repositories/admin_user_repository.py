@@ -4,13 +4,13 @@ from datetime import datetime, timezone
 
 from boto3.dynamodb.conditions import Key
 
-from app.core.dynamodb import dynamodb_resource
+from app.core.dynamodb import get_dynamodb_resource
 
 TABLE_NAME = "AdminUser"
 
 
 def _get_table():
-    return dynamodb_resource.Table(TABLE_NAME)
+    return get_dynamodb_resource().Table(TABLE_NAME)
 
 
 def get_by_username(store_id: str, username: str) -> dict | None:

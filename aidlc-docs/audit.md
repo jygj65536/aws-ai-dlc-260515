@@ -217,37 +217,61 @@
 
 ---
 
-## CONSTRUCTION - Code Generation (Backend) - User Request
-**Timestamp**: 2026-05-15T05:47:03Z
-**User Input**: "Construction phase의 code generation 시작하는데, auth 기능만 우선 진행해"
-**AI Response**: Code Generation Part 1 (Planning) 시작. 사용자 요청에 따라 Backend Unit의 Auth 기능만 우선 진행하는 코드 생성 계획 수립.
-**Context**: CONSTRUCTION Phase - Code Generation (Backend Unit). User requested auth-only first pass.
+## CONSTRUCTION - Code Generation (Frontend) - User Request
+**Timestamp**: 2026-05-15T05:38:01Z
+**User Input**: "프론트 코드 만들어 주세요"
+**AI Response**: Code Generation Part 1 (Planning) 시작. frontend-code-generation-plan.md 생성 완료. 15개 Step, 전체 스토리(US-1~US-9) 커버.
+**Context**: CONSTRUCTION Phase - Code Generation Part 1 (Planning) for Frontend unit. Plan created and presented for approval.
 
 ---
 
 
-## CONSTRUCTION - Code Generation (Backend) - Plan Approved
-**Timestamp**: 2026-05-15T05:49:08Z
-**User Input**: "go"
-**AI Response**: 계획 승인됨. Part 2 (Generation) 시작. Step 1부터 순차 실행.
-**Context**: CONSTRUCTION Phase - Code Generation Part 1 complete. Proceeding to Part 2 (Generation).
+## CONSTRUCTION - Code Generation (Frontend) - Plan Revision
+**Timestamp**: 2026-05-15T05:42:23Z
+**User Input**: "의존성은 최소화해 주세요. 브라우저 호환성은 크롬, 파이어폭스, 사파리로 정합니다."
+**AI Response**: 계획 업데이트 완료. 의존성 정책 섹션 추가 (런타임 의존성 최소화, 네이티브 API 우선), 브라우저 호환성 섹션 추가 (Chrome/Firefox/Safari 최신 2개 버전).
+**Context**: User requested minimal dependencies and specified browser compatibility. Plan updated accordingly.
 
 ---
 
 
-## CONSTRUCTION - Code Generation (Backend Auth) - Generation Complete
-**Timestamp**: 2026-05-15T05:56:30Z
-**AI Response**: Backend Auth 코드 생성 완료. 10개 Step 전체 실행 완료. 18개 테스트 모두 통과. passlib+bcrypt 호환성 이슈 발견 후 bcrypt==4.1.3 고정으로 해결.
-**Context**: CONSTRUCTION Phase - Code Generation Part 2 (Generation) complete for Auth scope. All plan checkboxes marked [x]. Presenting completion message.
+## CONSTRUCTION - Code Generation (Frontend) - Plan Approved
+**Timestamp**: 2026-05-15T05:44:29Z
+**User Input**: "승인합니다"
+**AI Response**: 계획 승인됨. Code Generation Part 2 (Generation) 시작.
+**Context**: User approved frontend code generation plan. Proceeding to Part 2 - Generation.
 
 ---
 
 
-## CONSTRUCTION - Code Generation (Backend Auth) - Test Summary Request
-**Timestamp**: 2026-05-15T05:57:43Z
-**User Input**: "지금 통과한 테스트 항목 요약해서 설명해줘"
-**AI Response**: 18개 테스트 항목 요약 제공.
-**Context**: CONSTRUCTION Phase - Code Generation. User requested test summary.
+## CONSTRUCTION - Code Generation (Frontend) - Generation Complete
+**Timestamp**: 2026-05-15T05:56:44Z
+**User Input**: "승인합니다" (계획 승인) → "npm 은 brew 로 설치" (환경 설정 지시)
+**AI Response**: Code Generation Part 2 완료. 15개 Step 모두 실행. 총 50+ 파일 생성. `npm install` + `npx next build` 성공 (TypeScript 컴파일, 린팅, 정적 페이지 생성 모두 통과).
+**Context**: CONSTRUCTION Phase - Code Generation Part 2 (Generation) complete for Frontend unit. Build verified successfully.
 
 ---
 
+
+## Code Generation - Part 1 (Planning)
+**Timestamp**: 2026-05-15T06:08:45Z
+**User Input**: "이제 code generation을 할 거야. 다른 기능은 다른 branch에서 구현해서 merge할 예정이니까 현재 브랜치가 feature/order인지 확인하고 order 관련 기능 generate해."
+**AI Response**: feature/order 브랜치로 전환 완료. Order 관련 Code Generation Plan 작성 완료 (9 Steps). 사용자 승인 대기 중.
+**Context**: CONSTRUCTION - Code Generation Part 1, Backend Order Feature
+
+---
+
+## Code Generation - Plan Approval
+**Timestamp**: 2026-05-15T06:09:17Z
+**User Input**: "진행"
+**AI Response**: 계획 승인 확인. Code Generation Part 2 (Generation) 시작.
+**Context**: CONSTRUCTION - Code Generation Part 1 승인 완료, Part 2 시작
+
+---
+
+## Code Generation - Part 2 (Generation) Complete
+**Timestamp**: 2026-05-15T06:14:34Z
+**AI Response**: Backend Order 코드 생성 완료 (9 Steps 모두 완료). 빌드 검증 통과 (모든 모듈 임포트 성공).
+**Context**: CONSTRUCTION - Code Generation Part 2, Backend Order Feature, feature/order 브랜치
+
+---
