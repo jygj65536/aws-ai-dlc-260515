@@ -1,51 +1,108 @@
-"""인메모리 저장소 - DynamoDB 대체 (로컬 개발용).
+"""SQLite 기반 저장소 - DynamoDB 대체 (로컬 개발용).
 
 Docker나 AWS 없이 로컬에서 바로 실행 가능.
-서버 재시작 시 데이터 초기화됨.
+데이터가 파일에 저장되어 서버 재시작 후에도 유지됨.
 """
 
+import json
+import os
+import sqlite3
 from copy import deepcopy
+from pathlib import Path
 from threading import Lock
 
+# SQLite DB 파일 경로 (프로젝트 루트의 backend/data/ 디렉토리)
+_DB_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+_DB_PATH = _DB_DIR / "local.db"
 
-class InMemoryTable:
-    """DynamoDB 테이블을 모방하는 인메모리 저장소.
 
+def _get_connection() -> sqlite3.Connection:
+    """SQLite 연결 반환."""
+    _DB_DIR.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(_DB_PATH), check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA foreign_keys=ON")
+    return conn
+
+
+# 모듈 레벨 연결 (싱글톤)
+_conn: sqlite3.Connection | None = None
+_lock = Lock()
+
+
+def _db() -> sqlite3.Connection:
+    global _conn
+    if _conn is None:
+        _conn = _get_connection()
+    return _conn
+
+
+class SQLiteTable:
+    """DynamoDB 테이블을 모방하는 SQLite 기반 저장소.
+
+    각 테이블은 SQLite의 별도 테이블로 저장.
+    아이템은 JSON으로 직렬화하여 저장.
     PK/SK 기반 조회, GSI 시뮬레이션 지원.
     """
 
-    def __init__(self, pk_name: str, sk_name: str | None = None):
+    def __init__(self, table_name: str, pk_name: str, sk_name: str | None = None):
+        self._table_name = table_name
         self._pk_name = pk_name
         self._sk_name = sk_name
-        self._data: dict[str, dict[str, dict]] = {}  # {pk: {sk: item}}
-        self._lock = Lock()
+        self._ensure_table()
+
+    def _ensure_table(self):
+        """SQLite 테이블 생성 (없으면)."""
+        conn = _db()
+        conn.execute(f"""
+            CREATE TABLE IF NOT EXISTS "{self._table_name}" (
+                pk TEXT NOT NULL,
+                sk TEXT NOT NULL DEFAULT '__default__',
+                data TEXT NOT NULL,
+                PRIMARY KEY (pk, sk)
+            )
+        """)
+        conn.commit()
 
     def put_item(self, Item: dict) -> None:
-        """아이템 저장."""
-        with self._lock:
-            pk = str(Item[self._pk_name])
-            sk = str(Item[self._sk_name]) if self._sk_name else "__default__"
-            if pk not in self._data:
-                self._data[pk] = {}
-            self._data[pk][sk] = deepcopy(Item)
+        """아이템 저장 (upsert)."""
+        pk = str(Item[self._pk_name])
+        sk = str(Item[self._sk_name]) if self._sk_name else "__default__"
+        data_json = json.dumps(Item, ensure_ascii=False, default=str)
+        conn = _db()
+        with _lock:
+            conn.execute(
+                f'INSERT OR REPLACE INTO "{self._table_name}" (pk, sk, data) VALUES (?, ?, ?)',
+                (pk, sk, data_json),
+            )
+            conn.commit()
 
     def get_item(self, Key: dict) -> dict:
         """아이템 단건 조회."""
         pk = str(Key[self._pk_name])
         sk = str(Key[self._sk_name]) if self._sk_name else "__default__"
-        with self._lock:
-            item = self._data.get(pk, {}).get(sk)
-            return {"Item": deepcopy(item)} if item else {}
+        conn = _db()
+        with _lock:
+            cursor = conn.execute(
+                f'SELECT data FROM "{self._table_name}" WHERE pk = ? AND sk = ?',
+                (pk, sk),
+            )
+            row = cursor.fetchone()
+        if row:
+            return {"Item": json.loads(row[0])}
+        return {}
 
     def delete_item(self, Key: dict) -> None:
         """아이템 삭제."""
         pk = str(Key[self._pk_name])
         sk = str(Key[self._sk_name]) if self._sk_name else "__default__"
-        with self._lock:
-            if pk in self._data and sk in self._data[pk]:
-                del self._data[pk][sk]
-                if not self._data[pk]:
-                    del self._data[pk]
+        conn = _db()
+        with _lock:
+            conn.execute(
+                f'DELETE FROM "{self._table_name}" WHERE pk = ? AND sk = ?',
+                (pk, sk),
+            )
+            conn.commit()
 
     def update_item(
         self,
@@ -62,14 +119,19 @@ class InMemoryTable:
         attr_names = ExpressionAttributeNames or {}
         attr_values = ExpressionAttributeValues or {}
 
-        with self._lock:
-            if pk not in self._data or sk not in self._data[pk]:
-                # 아이템이 없으면 생성
-                self._data.setdefault(pk, {})[sk] = deepcopy(Key)
+        with _lock:
+            conn = _db()
+            cursor = conn.execute(
+                f'SELECT data FROM "{self._table_name}" WHERE pk = ? AND sk = ?',
+                (pk, sk),
+            )
+            row = cursor.fetchone()
+            if row:
+                item = json.loads(row[0])
+            else:
+                item = deepcopy(Key)
 
-            item = self._data[pk][sk]
-
-            # 간단한 UpdateExpression 파싱
+            # UpdateExpression 파싱
             expr = UpdateExpression.strip()
 
             # SET 처리
@@ -84,13 +146,9 @@ class InMemoryTable:
                     left, right = assignment.split("=", 1)
                     left = left.strip()
                     right = right.strip()
-
-                    # 속성 이름 치환
                     field = attr_names.get(left, left)
 
-                    # 값 계산
                     if "+" in right:
-                        # total_amount = total_amount + :delta
                         parts = [p.strip() for p in right.split("+")]
                         base_field = attr_names.get(parts[0], parts[0])
                         current_val = item.get(base_field, 0)
@@ -111,8 +169,16 @@ class InMemoryTable:
                     real_field = attr_names.get(field, field)
                     item.pop(real_field, None)
 
-            result = {"Attributes": deepcopy(item)} if ReturnValues != "NONE" else {}
-            return result
+            # 저장
+            data_json = json.dumps(item, ensure_ascii=False, default=str)
+            conn.execute(
+                f'INSERT OR REPLACE INTO "{self._table_name}" (pk, sk, data) VALUES (?, ?, ?)',
+                (pk, sk, data_json),
+            )
+            conn.commit()
+
+        result = {"Attributes": deepcopy(item)} if ReturnValues != "NONE" else {}
+        return result
 
     def query(
         self,
@@ -125,62 +191,59 @@ class InMemoryTable:
         **kwargs,
     ) -> dict:
         """쿼리 (PK 기반 조회 시뮬레이션)."""
-        with self._lock:
-            all_items = []
-            for pk_items in self._data.values():
-                for item in pk_items.values():
-                    all_items.append(item)
+        conn = _db()
+        with _lock:
+            cursor = conn.execute(f'SELECT data FROM "{self._table_name}"')
+            all_items = [json.loads(row[0]) for row in cursor.fetchall()]
 
-            # KeyConditionExpression 필터링
-            if KeyConditionExpression:
-                all_items = [
-                    item for item in all_items
-                    if KeyConditionExpression.evaluate(item)
-                ]
+        # KeyConditionExpression 필터링
+        if KeyConditionExpression:
+            all_items = [
+                item for item in all_items
+                if KeyConditionExpression.evaluate(item)
+            ]
 
-            # FilterExpression 필터링
-            if FilterExpression:
-                all_items = [
-                    item for item in all_items
-                    if FilterExpression.evaluate(item)
-                ]
+        # FilterExpression 필터링
+        if FilterExpression:
+            all_items = [
+                item for item in all_items
+                if FilterExpression.evaluate(item)
+            ]
 
-            # 정렬 (SK 기준)
-            sk_field = self._sk_name or "created_at"
-            if IndexName:
-                # GSI의 SK 필드 추정
-                sk_field = _guess_gsi_sk(IndexName)
-            all_items.sort(
-                key=lambda x: str(x.get(sk_field, "")),
-                reverse=not ScanIndexForward,
-            )
+        # 정렬
+        sk_field = self._sk_name or "created_at"
+        if IndexName:
+            sk_field = _guess_gsi_sk(IndexName)
+        all_items.sort(
+            key=lambda x: str(x.get(sk_field, "")),
+            reverse=not ScanIndexForward,
+        )
 
-            if Limit:
-                all_items = all_items[:Limit]
+        if Limit:
+            all_items = all_items[:Limit]
 
-            if Select == "COUNT":
-                return {"Count": len(all_items), "Items": []}
+        if Select == "COUNT":
+            return {"Count": len(all_items), "Items": []}
 
-            return {"Items": deepcopy(all_items), "Count": len(all_items)}
+        return {"Items": all_items, "Count": len(all_items)}
 
     def batch_writer(self):
-        """배치 라이터 (호환용)."""
+        """배치 라이터."""
         return _BatchWriter(self)
 
     def scan(self, **kwargs) -> dict:
         """전체 스캔."""
-        with self._lock:
-            all_items = []
-            for pk_items in self._data.values():
-                for item in pk_items.values():
-                    all_items.append(deepcopy(item))
-            return {"Items": all_items, "Count": len(all_items)}
+        conn = _db()
+        with _lock:
+            cursor = conn.execute(f'SELECT data FROM "{self._table_name}"')
+            all_items = [json.loads(row[0]) for row in cursor.fetchall()]
+        return {"Items": all_items, "Count": len(all_items)}
 
 
 class _BatchWriter:
     """배치 라이터 컨텍스트 매니저."""
 
-    def __init__(self, table: InMemoryTable):
+    def __init__(self, table: SQLiteTable):
         self._table = table
 
     def __enter__(self):
@@ -242,7 +305,14 @@ class _EqCondition(_Condition):
         self.value = value
 
     def evaluate(self, item: dict) -> bool:
-        return item.get(self.field) == self.value
+        item_val = item.get(self.field)
+        # 숫자 비교 지원
+        if isinstance(self.value, (int, float)):
+            try:
+                return _to_number(item_val) == self.value
+            except (ValueError, TypeError):
+                pass
+        return item_val == self.value
 
 
 class _GtCondition(_Condition):
@@ -363,15 +433,14 @@ def Attr(field: str) -> _AttrHelper:
     return _AttrHelper(field)
 
 
-# --- 테이블 레지스트리 (싱글톤) ---
+# --- 테이블 레지스트리 ---
 
-_tables: dict[str, InMemoryTable] = {}
+_tables: dict[str, SQLiteTable] = {}
 
 
-def get_table(table_name: str) -> InMemoryTable:
+def get_table(table_name: str) -> SQLiteTable:
     """테이블 인스턴스 반환 (없으면 생성)."""
     if table_name not in _tables:
-        # 테이블별 PK/SK 매핑
         schema = {
             "Store": ("store_id", None),
             "AdminUser": ("store_id", "username"),
@@ -383,10 +452,20 @@ def get_table(table_name: str) -> InMemoryTable:
             "MenuItem": ("store_id", "menu_id"),
         }
         pk, sk = schema.get(table_name, ("id", None))
-        _tables[table_name] = InMemoryTable(pk_name=pk, sk_name=sk)
+        _tables[table_name] = SQLiteTable(table_name=table_name, pk_name=pk, sk_name=sk)
     return _tables[table_name]
 
 
 def reset_all_tables() -> None:
     """모든 테이블 초기화 (테스트용)."""
+    conn = _db()
+    with _lock:
+        for table_name in list(_tables.keys()):
+            conn.execute(f'DELETE FROM "{table_name}"')
+        conn.commit()
     _tables.clear()
+
+
+def get_db_path() -> str:
+    """DB 파일 경로 반환."""
+    return str(_DB_PATH)

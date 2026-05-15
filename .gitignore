@@ -25,6 +25,9 @@ Thumbs.db
 # pytest
 .pytest_cache/
 
+# SQLite (로컬 개발 DB)
+backend/data/
+
 # Node (frontend)
 node_modules/
 .next/

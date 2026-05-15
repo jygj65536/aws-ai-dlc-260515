@@ -20,7 +20,13 @@ TABLE_2_PASSWORD = "2222"
 
 
 def seed() -> None:
-    """시드 데이터 삽입."""
+    """시드 데이터 삽입 (이미 있으면 스킵)."""
+    store_table = get_table("Store")
+    existing = store_table.get_item(Key={"store_id": STORE_ID})
+    if existing.get("Item"):
+        print("🌱 시드 데이터 이미 존재 (스킵)")
+        return
+
     _seed_store()
     _seed_admin()
     _seed_tables()
