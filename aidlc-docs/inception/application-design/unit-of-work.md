@@ -14,7 +14,7 @@
 | **유닛명** | backend |
 | **기술** | FastAPI (Python 3.11+) |
 | **위치** | `backend/` |
-| **책임** | REST API, 비즈니스 로직, DynamoDB 접근, SSE 관리 |
+| **책임** | REST API, 비즈니스 로직, SQLite 데이터 접근, SSE 관리 |
 | **배포** | 로컬 서버 (uvicorn) |
 
 ### 포함 컴포넌트
@@ -31,7 +31,7 @@ backend/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py                 # FastAPI 앱 진입점
-│   ├── config.py               # 설정 (환경변수, DynamoDB 설정)
+│   ├── config.py               # 설정 (환경변수)
 │   ├── dependencies.py         # 의존성 주입 (인증 등)
 │   ├── routers/
 │   │   ├── __init__.py
@@ -62,14 +62,17 @@ backend/
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── auth.py             # 요청/응답 스키마
-│   │   ├── store.py
 │   │   ├── table.py
 │   │   ├── menu.py
 │   │   └── order.py
 │   └── core/
 │       ├── __init__.py
 │       ├── security.py         # JWT, bcrypt 유틸
-│       └── dynamodb.py         # DynamoDB 클라이언트
+│       ├── dynamodb.py         # DB 클라이언트 (SQLite/DynamoDB 전환)
+│       ├── storage.py          # SQLite 기반 DynamoDB API 호환 래퍼
+│       └── seed_data.py        # 시드 데이터 (로컬 개발용)
+├── data/
+│   └── local.db                # SQLite DB 파일 (gitignore)
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -77,12 +80,14 @@ backend/
 
 ### 주요 의존성 (Python 패키지)
 - fastapi
-- uvicorn
-- boto3 (DynamoDB)
-- python-jose (JWT)
+- uvicorn[standard]
+- pydantic / pydantic-settings
+- python-jose[cryptography] (JWT)
 - passlib[bcrypt] (비밀번호 해싱)
-- pydantic (데이터 검증)
 - sse-starlette (SSE 지원)
+- python-dotenv
+- boto3 (USE_DYNAMODB=true 시에만 사용)
+- httpx, pytest, pytest-asyncio, moto (테스트용)
 
 ---
 
@@ -147,11 +152,11 @@ frontend/
 ```
 
 ### 주요 의존성 (npm 패키지)
-- next
-- react, react-dom
-- typescript
-- tailwindcss (스타일링)
-- zustand 또는 Context API (상태 관리)
+- next 14.2
+- react 18, react-dom 18
+- typescript 5.5
+- tailwindcss 3.4 (스타일링)
+- React state + localStorage (상태 관리, 별도 라이브러리 없음)
 
 ---
 
@@ -159,7 +164,7 @@ frontend/
 
 ```
 Phase 1: Backend (Unit 1)
-  → API 전체 구현 + DynamoDB 테이블 생성 + SSE 구현
+  → API 전체 구현 + SQLite 저장소 + SSE 구현 + 시드 데이터
 
 Phase 2: Frontend (Unit 2)
   → 백엔드 API 연동 + UI 구현 + SSE 클라이언트

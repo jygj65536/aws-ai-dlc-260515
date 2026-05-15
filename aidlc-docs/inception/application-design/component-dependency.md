@@ -79,10 +79,10 @@
 
 ---
 
-## DynamoDB 테이블 의존성
+## 데이터 저장소 테이블 의존성
 
-| DynamoDB 테이블 | 접근하는 서비스 |
-|----------------|----------------|
+| 테이블 | 접근하는 서비스 |
+|--------|----------------|
 | Store | StoreService, AuthService |
 | AdminUser | AuthService |
 | Table | AuthService, TableService |
@@ -90,5 +90,6 @@
 | Category | MenuService |
 | MenuItem | MenuService |
 | Order | OrderService, TableService |
-| OrderItem | OrderService |
 | OrderHistory | TableService |
+
+> **참고**: OrderItem 테이블은 제거됨 (Order.items에 임베디드)

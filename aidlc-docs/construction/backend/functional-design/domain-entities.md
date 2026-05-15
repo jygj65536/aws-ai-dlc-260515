@@ -1,6 +1,22 @@
 # Domain Entities - Backend
 
-## DynamoDB 테이블 설계 (Table-per-Entity)
+## 데이터 저장소 설계
+
+### 구현 방식
+- **저장소**: SQLite (파일: `backend/data/local.db`)
+- **인터페이스**: DynamoDB API 호환 래퍼 (`app/core/storage.py`)
+- **구조**: 각 엔티티가 별도 SQLite 테이블, 데이터는 JSON으로 직렬화
+- **전환**: `USE_DYNAMODB=true` 환경변수로 실제 DynamoDB 사용 가능
+
+### SQLite 내부 구조 (모든 테이블 공통)
+```sql
+CREATE TABLE "{table_name}" (
+    pk TEXT NOT NULL,
+    sk TEXT NOT NULL DEFAULT '__default__',
+    data TEXT NOT NULL,  -- JSON 직렬화된 엔티티 데이터
+    PRIMARY KEY (pk, sk)
+);
+```
 
 ---
 

@@ -11,7 +11,7 @@
 | `backend/app/main.py` | FastAPI 앱 진입점 |
 | `backend/app/config.py` | 환경변수 설정 (pydantic-settings) |
 | `backend/app/dependencies.py` | 의존성 주입 (인증 스텁 포함) |
-| `backend/app/core/dynamodb.py` | DynamoDB 클라이언트 |
+| `backend/app/core/dynamodb.py` | DB 클라이언트 (SQLite/DynamoDB 전환) |
 | `backend/requirements.txt` | Python 패키지 의존성 |
 | `backend/.env.example` | 환경변수 예시 |
 
@@ -43,7 +43,7 @@
 ### 스크립트
 | 파일 | 설명 |
 |------|------|
-| `backend/scripts/create_tables.py` | DynamoDB 테이블 생성 |
+| `backend/scripts/create_tables.py` | DB 테이블 생성 (DynamoDB 모드용) |
 
 ### 문서
 | 파일 | 설명 |

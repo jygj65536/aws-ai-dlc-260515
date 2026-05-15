@@ -5,9 +5,9 @@
 ### 기술 스택
 | 영역 | 기술 | 역할 |
 |------|------|------|
-| 백엔드 | FastAPI (Python) | REST API + SSE 서버 |
-| 프론트엔드 | Next.js (TypeScript) | 고객용 + 관리자용 웹앱 |
-| 데이터베이스 | DynamoDB | NoSQL 데이터 저장 |
+| 백엔드 | FastAPI (Python 3.12) | REST API + SSE 서버 |
+| 프론트엔드 | Next.js 14 (TypeScript) | 고객용 + 관리자용 웹앱 |
+| 데이터베이스 | SQLite (DynamoDB API 호환 래퍼) | 로컬 파일 기반 데이터 저장 |
 | 실시간 통신 | SSE (Server-Sent Events) | 주문 모니터링 |
 
 ### 설계 결정사항
@@ -15,9 +15,17 @@
 |------|------|------|
 | 백엔드 구조 | 레이어드 아키텍처 (Router→Service→Repository) | 관심사 분리, 테스트 용이 |
 | 프론트엔드 구조 | 단일 Next.js 앱 (라우팅 분리) | 소규모 MVP에 적합, 코드 공유 |
-| DB 설계 | Table-per-Entity | 직관적, DynamoDB 학습 곡선 완화 |
+| DB 설계 | SQLite + DynamoDB API 호환 래퍼 | Docker 불필요, 로컬 즉시 실행, 데이터 영속 |
 | 통신 | REST + SSE | 요구사항 충족, WebSocket 대비 단순 |
 | 프로젝트 구조 | 모노레포 (backend/ + frontend/) | 단일 팀 관리 편의 |
+
+### 구현 변경 사항 (설계 대비)
+| 원본 설계 | 실제 구현 | 변경 이유 |
+|-----------|-----------|-----------|
+| DynamoDB (AWS/Docker) | SQLite 파일 DB | Docker 없이 로컬 즉시 실행, 서버 재시작 후 데이터 유지 |
+| boto3 직접 사용 | DynamoDB API 호환 래퍼 (storage.py) | Repository 코드 변경 최소화, 향후 DynamoDB 전환 용이 |
+| 9개 테이블 | 8개 테이블 | OrderItem을 Order.items에 임베디드 |
+| zustand (상태 관리) | React state + localStorage | 소규모 MVP에 별도 라이브러리 불필요 |
 
 ---
 
@@ -27,13 +35,13 @@
 +-------------------+          +-------------------+
 |   Customer        |   REST   |                   |
 |   (Tablet)        |--------->|                   |
-|   Next.js         |          |   FastAPI         |
-+-------------------+          |   Backend         |       +-----------+
-                               |                   |------>| DynamoDB  |
-+-------------------+   REST   |   - Routers       |       | (9 Tables)|
+|   Next.js :3000   |          |   FastAPI         |
++-------------------+          |   Backend :8080   |       +-----------+
+                               |                   |------>| SQLite    |
++-------------------+   REST   |   - Routers       |       | local.db  |
 |   Admin           |--------->|   - Services      |       +-----------+
 |   (Browser)       |<---------|   - Repositories  |
-|   Next.js         |   SSE    |   - SSE Manager   |
+|   Next.js :3000   |   SSE    |   - SSE Manager   |
 +-------------------+          +-------------------+
 ```
 
@@ -80,7 +88,7 @@
 
 ---
 
-## 6. DynamoDB 테이블 (9개)
+## 6. 데이터 저장소 (SQLite - 8개 테이블)
 
 | 테이블명 | PK | SK | 용도 |
 |----------|----|----|------|
@@ -90,16 +98,17 @@
 | TableSession | table_id | session_id | 테이블 세션 |
 | Category | store_id | category_id | 메뉴 카테고리 |
 | MenuItem | store_id | menu_id | 메뉴 항목 |
-| Order | session_id | order_id | 주문 |
-| OrderItem | order_id | item_id | 주문 항목 |
+| Order | session_id | order_id | 주문 (items 임베디드) |
 | OrderHistory | table_id | history_id | 과거 주문 이력 |
+
+> **참고**: SQLite 내부적으로는 각 테이블이 `(pk, sk, data)` 구조로 저장되며, data 컬럼에 JSON으로 직렬화됩니다.
 
 ---
 
 ## 7. 핵심 플로우
 
 ### 주문 생성
-고객 장바구니 → POST /api/orders → OrderService → DynamoDB 저장 → SSE 브로드캐스트 → 관리자 대시보드 표시
+고객 장바구니 → POST /api/orders → OrderService → SQLite 저장 → SSE 브로드캐스트 → 관리자 대시보드 표시
 
 ### 이용 완료
 관리자 클릭 → POST /api/tables/{id}/complete → TableService → 주문 이력 이동 → 세션 종료 → 테이블 리셋 → SSE 브로드캐스트

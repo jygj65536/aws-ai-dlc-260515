@@ -3,7 +3,7 @@
 ## 서비스 아키텍처 개요
 
 ```
-[Frontend] → REST API → [Router] → [Service] → [Repository] → [DynamoDB]
+[Frontend] → REST API → [Router] → [Service] → [Repository] → [SQLite]
                               ↓
                          [SSE Manager] → [Admin Dashboard]
 ```
@@ -11,7 +11,7 @@
 레이어드 아키텍처 (Controller → Service → Repository):
 - **Router (Controller)**: HTTP 요청/응답 처리, 입력 검증, 인증 확인
 - **Service**: 비즈니스 로직, 트랜잭션 조율, 이벤트 발행
-- **Repository**: DynamoDB 데이터 접근, 쿼리 실행
+- **Repository**: 데이터 접근 (SQLite, DynamoDB API 호환 인터페이스)
 
 ---
 

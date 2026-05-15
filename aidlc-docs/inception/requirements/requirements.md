@@ -18,7 +18,7 @@
 |------|------|------|
 | **백엔드** | FastAPI (Python) | REST API 서버 |
 | **프론트엔드** | Next.js (React/TypeScript) | 고객용 + 관리자용 |
-| **데이터베이스** | DynamoDB | AWS NoSQL |
+| **데이터베이스** | SQLite (로컬) | DynamoDB API 호환 래퍼, Docker 불필요 |
 | **배포 환경** | 로컬/온프레미스 | 개발 및 운영 |
 | **실시간 통신** | Server-Sent Events (SSE) | 주문 모니터링용 |
 

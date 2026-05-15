@@ -8,7 +8,7 @@
 | **Frontend** | ✅ 의존 | - |
 
 - Frontend → Backend: REST API + SSE 연결 의존
-- Backend: 독립적 (외부 의존 없음, DynamoDB만 필요)
+- Backend: 독립적 (외부 의존 없음, SQLite 파일 기반)
 
 ---
 
@@ -45,11 +45,11 @@ Frontend가 Backend에 의존하는 핵심 계약:
 
 | 계약 | 내용 |
 |------|------|
-| Base URL | `http://localhost:8000/api` |
+| Base URL | `http://localhost:8080/api` (Next.js 프록시: `/api` → `localhost:8080`) |
 | 인증 헤더 | `Authorization: Bearer {token}` |
 | 응답 형식 | JSON |
 | 에러 형식 | `{detail: string}` (FastAPI 기본) |
-| SSE URL | `http://localhost:8000/api/sse/orders/{store_id}` |
+| SSE URL | `http://localhost:8080/api/sse/orders/{store_id}` |
 | SSE 이벤트 | `new_order`, `order_updated`, `order_deleted`, `table_completed` |
 
 ---
@@ -59,5 +59,5 @@ Frontend가 Backend에 의존하는 핵심 계약:
 | 리스크 | 영향 | 완화 방안 |
 |--------|------|-----------|
 | API 스펙 변경 | Frontend 수정 필요 | Backend 먼저 완성하여 스펙 확정 |
-| DynamoDB 로컬 설정 | 개발 환경 복잡도 | DynamoDB Local 사용 |
+| DynamoDB 로컬 설정 | 개발 환경 복잡도 | SQLite 사용으로 해결 (Docker 불필요) |
 | SSE 연결 끊김 | 실시간 모니터링 중단 | 자동 재연결 로직 구현 |

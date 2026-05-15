@@ -30,35 +30,35 @@ table-order/                    # 모노레포
 |------|------|
 | **책임** | 관리자 인증, 테이블 태블릿 인증, JWT 토큰 발급/검증 |
 | **레이어** | Router → Service → Repository |
-| **의존** | DynamoDB (AdminUser, Table 테이블) |
+| **의존** | SQLite (AdminUser, Table 테이블) |
 
 ### BE-2: Store Router/Service/Repository
 | 항목 | 내용 |
 |------|------|
 | **책임** | 매장 정보 관리 |
 | **레이어** | Router → Service → Repository |
-| **의존** | DynamoDB (Store 테이블) |
+| **의존** | SQLite (Store 테이블) |
 
 ### BE-3: Table Router/Service/Repository
 | 항목 | 내용 |
 |------|------|
 | **책임** | 테이블 CRUD, 세션 시작/종료, 이용 완료 처리, 과거 내역 조회 |
 | **레이어** | Router → Service → Repository |
-| **의존** | DynamoDB (Table, TableSession, OrderHistory 테이블) |
+| **의존** | SQLite (Table, TableSession, OrderHistory 테이블) |
 
 ### BE-4: Menu Router/Service/Repository
 | 항목 | 내용 |
 |------|------|
 | **책임** | 메뉴/카테고리 CRUD, 메뉴 순서 관리 |
 | **레이어** | Router → Service → Repository |
-| **의존** | DynamoDB (Category, MenuItem 테이블) |
+| **의존** | SQLite (Category, MenuItem 테이블) |
 
 ### BE-5: Order Router/Service/Repository
 | 항목 | 내용 |
 |------|------|
 | **책임** | 주문 생성, 주문 상태 변경, 주문 조회, 주문 삭제, SSE 이벤트 발행 |
 | **레이어** | Router → Service → Repository |
-| **의존** | DynamoDB (Order, OrderItem 테이블), SSE Manager |
+| **의존** | SQLite (Order 테이블, items 임베디드), SSE Manager |
 
 ### BE-6: SSE Manager
 | 항목 | 내용 |
