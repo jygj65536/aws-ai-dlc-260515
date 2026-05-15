@@ -153,9 +153,10 @@ export default function DashboardPage() {
     };
   }, [fetchData, handleSSEEvent]);
 
-  const handleStatusChange = async (orderId: string, status: 'preparing' | 'completed') => {
+  const handleStatusChange = async (orderId: string, status: 'preparing' | 'completed', sessionId?: string) => {
     try {
-      await api.patch(`/orders/${orderId}/status`, { status });
+      const sid = sessionId || tables.flatMap(t => t.orders).find(o => o.order_id === orderId)?.session_id;
+      await api.patch(`/orders/${orderId}/status?session_id=${sid}`, { status });
       setTables((prev) =>
         prev.map((t) => ({
           ...t,

@@ -45,7 +45,7 @@ export default function CartPage() {
 
   const handleOrder = async () => {
     const authInfo = getAuthInfo();
-    if (!authInfo || !authInfo.table_id || !authInfo.session_id) {
+    if (!authInfo || !authInfo.table_id) {
       setError('인증 정보가 없습니다. 다시 로그인해주세요.');
       return;
     }
@@ -57,7 +57,7 @@ export default function CartPage() {
       const response = await api.post<OrderCreateResponse>('/orders', {
         store_id: authInfo.store_id,
         table_id: authInfo.table_id,
-        session_id: authInfo.session_id,
+        session_id: authInfo.session_id || null,
         items: items.map((item) => ({
           menu_id: item.menu_id,
           name: item.name,
@@ -65,6 +65,12 @@ export default function CartPage() {
           price: item.price,
         })),
       });
+
+      // 세션 ID 업데이트 (첫 주문 시 서버에서 생성됨)
+      if (response.session_id) {
+        const { saveAuthInfo } = await import('@/lib/auth');
+        saveAuthInfo({ ...authInfo, session_id: response.session_id });
+      }
 
       setOrderNumber(response.order_number);
       clearCart();

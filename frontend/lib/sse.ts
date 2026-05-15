@@ -4,6 +4,11 @@ import { getToken } from './auth';
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 3000;
 
+// SSE는 Next.js 프록시를 우회하여 백엔드에 직접 연결
+const SSE_BASE_URL = typeof window !== 'undefined'
+  ? `http://${window.location.hostname}:8080`
+  : 'http://localhost:8080';
+
 interface SSEOptions {
   onEvent: (event: SSEEvent) => void;
   onConnect?: () => void;
@@ -26,7 +31,7 @@ export class SSEClient {
   connect(): void {
     this.isManualClose = false;
     const token = getToken();
-    const url = `/api/sse/orders/${this.storeId}${token ? `?token=${token}` : ''}`;
+    const url = `${SSE_BASE_URL}/api/sse/orders/${this.storeId}${token ? `?token=${token}` : ''}`;
 
     this.eventSource = new EventSource(url);
 

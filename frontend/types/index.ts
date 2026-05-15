@@ -163,6 +163,7 @@ export interface OrderCreateResponse {
   order_id: string;
   order_number: number;
   total_amount: number;
+  session_id: string;
 }
 
 export interface OrderStatusUpdateRequest {
