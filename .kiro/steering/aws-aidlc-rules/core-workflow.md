@@ -481,6 +481,7 @@ The Operations stage will eventually include:
 - **CRITICAL**: ALWAYS append changes to EDIT audit.md file, NEVER use tools and commands that completely overwrite its contents
 - **CRITICAL**: NEVER use file writing tools and commands that overwrite the entire contents of audit.md, as this causes duplication
 - Use ISO 8601 format for timestamps (YYYY-MM-DDTHH:MM:SSZ)
+- **CRITICAL**: To obtain the REAL current timestamp, ALWAYS run the shell command `date -u +"%Y-%m-%dT%H:%M:%SZ"` and use its output. NEVER fabricate or guess timestamps. If the command fails, use "[timestamp unavailable]" instead of a dummy value.
 - Include stage context for each entry
 
 ### Audit Log Format:
