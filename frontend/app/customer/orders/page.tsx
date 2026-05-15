@@ -18,7 +18,17 @@ export default function OrdersPage() {
     setError('');
     try {
       const authInfo = getAuthInfo();
-      if (!authInfo?.session_id) return;
+      if (!authInfo) {
+        setIsLoading(false);
+        return;
+      }
+
+      // session_id가 있으면 세션별 조회, 없으면 빈 목록
+      if (!authInfo.session_id) {
+        setOrders([]);
+        setIsLoading(false);
+        return;
+      }
 
       const data = await api.get<Order[]>(
         `/orders?session_id=${authInfo.session_id}`

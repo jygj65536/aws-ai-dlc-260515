@@ -14,29 +14,41 @@ export default function CustomerLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isReady, setIsReady] = useState(false);
+  const [authState, setAuthState] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
   const [tableNumber, setTableNumber] = useState<number | null>(null);
 
   useEffect(() => {
     // setup 페이지는 인증 불필요
     if (pathname === '/customer/setup') {
-      setIsReady(true);
+      setAuthState('authenticated');
       return;
     }
 
+    // localStorage에서 인증 정보 확인
     const token = getToken();
     const authInfo = getAuthInfo();
 
-    if (!token || !authInfo || authInfo.user_type !== 'table') {
-      router.replace('/customer/setup');
-      return;
+    if (token && authInfo && authInfo.user_type === 'table') {
+      setTableNumber(authInfo.table_number ?? null);
+      setAuthState('authenticated');
+    } else {
+      setAuthState('unauthenticated');
     }
+  }, [pathname]);
 
-    setTableNumber(authInfo.table_number ?? null);
-    setIsReady(true);
-  }, [router, pathname]);
+  // 미인증 시 setup으로 리다이렉트 (useEffect 분리하여 무한 루프 방지)
+  useEffect(() => {
+    if (authState === 'unauthenticated' && pathname !== '/customer/setup') {
+      router.replace('/customer/setup');
+    }
+  }, [authState, pathname, router]);
 
-  if (!isReady) {
+  // setup 페이지는 레이아웃 없이 바로 렌더
+  if (pathname === '/customer/setup') {
+    return <>{children}</>;
+  }
+
+  if (authState === 'loading' || authState === 'unauthenticated') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />

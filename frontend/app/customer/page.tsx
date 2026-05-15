@@ -28,7 +28,10 @@ export default function CustomerMenuPage() {
     setError('');
     try {
       const authInfo = getAuthInfo();
-      if (!authInfo) return;
+      if (!authInfo) {
+        setIsLoading(false);
+        return;
+      }
 
       const response = await api.get<MenuListResponse>(
         `/menus?store_id=${authInfo.store_id}`
