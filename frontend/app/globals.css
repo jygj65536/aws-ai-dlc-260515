@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+
+  /* 터치 친화적 기본 설정 */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply min-h-touch min-w-touch;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 text-white px-4 py-3 rounded-lg font-medium
+           hover:bg-primary-700 active:bg-primary-800
+           disabled:bg-gray-300 disabled:cursor-not-allowed
+           transition-colors duration-150;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-700 px-4 py-3 rounded-lg font-medium
+           border border-gray-300
+           hover:bg-gray-50 active:bg-gray-100
+           disabled:bg-gray-100 disabled:cursor-not-allowed
+           transition-colors duration-150;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-3 rounded-lg font-medium
+           hover:bg-red-700 active:bg-red-800
+           disabled:bg-gray-300 disabled:cursor-not-allowed
+           transition-colors duration-150;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           placeholder:text-gray-400;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-4;
+  }
+}
