@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { getToken, getAuthInfo } from '@/lib/auth';
 import { CustomerHeader } from '@/components/customer/CustomerHeader';
 import { CartFloatingButton } from '@/components/customer/CartFloatingButton';
@@ -13,10 +13,17 @@ export default function CustomerLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
   const [tableNumber, setTableNumber] = useState<number | null>(null);
 
   useEffect(() => {
+    // setup 페이지는 인증 불필요
+    if (pathname === '/customer/setup') {
+      setIsReady(true);
+      return;
+    }
+
     const token = getToken();
     const authInfo = getAuthInfo();
 
@@ -27,7 +34,7 @@ export default function CustomerLayout({
 
     setTableNumber(authInfo.table_number ?? null);
     setIsReady(true);
-  }, [router]);
+  }, [router, pathname]);
 
   if (!isReady) {
     return (

@@ -11,7 +11,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 interface CategoryWithItems {
-  id: string;
+  category_id: string;
   name: string;
   items: MenuItem[];
 }
@@ -35,7 +35,7 @@ export default function CustomerMenuPage() {
       );
       setCategories(response.categories);
       if (response.categories.length > 0 && !selectedCategoryId) {
-        setSelectedCategoryId(response.categories[0].id);
+        setSelectedCategoryId(response.categories[0].category_id);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '메뉴를 불러올 수 없습니다.');
@@ -50,7 +50,7 @@ export default function CustomerMenuPage() {
   }, []);
 
   const filteredItems = selectedCategoryId
-    ? categories.find((c) => c.id === selectedCategoryId)?.items ?? []
+    ? categories.find((c) => c.category_id === selectedCategoryId)?.items ?? []
     : categories.flatMap((c) => c.items);
 
   if (isLoading) {
@@ -72,7 +72,7 @@ export default function CustomerMenuPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-4">
       <CategoryTabs
-        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+        categories={categories.map((c) => ({ id: c.category_id, name: c.name }))}
         selectedId={selectedCategoryId}
         onSelect={setSelectedCategoryId}
       />

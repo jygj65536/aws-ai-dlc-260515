@@ -119,8 +119,9 @@ export interface MenuUpdateRequest {
 
 export interface MenuListResponse {
   categories: Array<{
-    id: string;
+    category_id: string;
     name: string;
+    sort_order: number;
     items: MenuItem[];
   }>;
 }
