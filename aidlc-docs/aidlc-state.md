@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-15T09:00:00Z
-- **Current Stage**: INCEPTION - Units Generation (Complete)
+- **Current Stage**: CONSTRUCTION - Functional Design (Next)
 
 ## Execution Plan Summary
 - **Total Stages**: 6 (실행 대상)

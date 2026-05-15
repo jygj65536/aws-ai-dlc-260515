@@ -22,13 +22,13 @@
 flowchart TD
     Start(["User Request"])
     
-    subgraph INCEPTION["🔵 INCEPTION PHASE"]
+    subgraph INCEPTION["🔵 INCEPTION PHASE (COMPLETED)"]
         WD["Workspace Detection<br/><b>COMPLETED</b>"]
         RA["Requirements Analysis<br/><b>COMPLETED</b>"]
         US["User Stories<br/><b>COMPLETED</b>"]
         WP["Workflow Planning<br/><b>COMPLETED</b>"]
-        AD["Application Design<br/><b>EXECUTE</b>"]
-        UG["Units Generation<br/><b>EXECUTE</b>"]
+        AD["Application Design<br/><b>COMPLETED</b>"]
+        UG["Units Generation<br/><b>COMPLETED</b>"]
     end
     
     subgraph CONSTRUCTION["🟢 CONSTRUCTION PHASE"]
@@ -55,14 +55,14 @@ flowchart TD
     style RA fill:#4CAF50,stroke:#1B5E20,stroke-width:3px,color:#fff
     style US fill:#4CAF50,stroke:#1B5E20,stroke-width:3px,color:#fff
     style WP fill:#4CAF50,stroke:#1B5E20,stroke-width:3px,color:#fff
-    style AD fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
-    style UG fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
+    style AD fill:#4CAF50,stroke:#1B5E20,stroke-width:3px,color:#fff
+    style UG fill:#4CAF50,stroke:#1B5E20,stroke-width:3px,color:#fff
     style FD fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
     style NFRA fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
     style NFRD fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
     style ID fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
-    style CG fill:#4CAF50,stroke:#1B5E20,stroke-width:3px,color:#fff
-    style BT fill:#4CAF50,stroke:#1B5E20,stroke-width:3px,color:#fff
+    style CG fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
+    style BT fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
     style Start fill:#CE93D8,stroke:#6A1B9A,stroke-width:3px,color:#000
     style End fill:#CE93D8,stroke:#6A1B9A,stroke-width:3px,color:#000
     style INCEPTION fill:#BBDEFB,stroke:#1565C0,stroke-width:3px,color:#000
@@ -71,15 +71,15 @@ flowchart TD
 
 ### Text Alternative
 ```
-Phase 1: INCEPTION
+Phase 1: INCEPTION (ALL COMPLETED)
 - Workspace Detection (COMPLETED)
 - Requirements Analysis (COMPLETED)
 - User Stories (COMPLETED)
 - Workflow Planning (COMPLETED)
-- Application Design (EXECUTE)
-- Units Generation (EXECUTE)
+- Application Design (COMPLETED)
+- Units Generation (COMPLETED)
 
-Phase 2: CONSTRUCTION
+Phase 2: CONSTRUCTION (NEXT)
 - Functional Design (EXECUTE, per-unit)
 - NFR Requirements (SKIP)
 - NFR Design (SKIP)
@@ -97,9 +97,9 @@ Phase 2: CONSTRUCTION
 - [x] Requirements Analysis (COMPLETED)
 - [x] User Stories (COMPLETED)
 - [x] Workflow Planning (COMPLETED)
-- [ ] Application Design - **EXECUTE**
+- [x] Application Design - **COMPLETED**
   - **Rationale**: 신규 프로젝트로 컴포넌트 식별, 서비스 레이어 설계, API 엔드포인트 정의 필요
-- [ ] Units Generation - **EXECUTE**
+- [x] Units Generation - **COMPLETED**
   - **Rationale**: 백엔드(FastAPI) + 프론트엔드(Next.js) 다중 유닛으로 분해 필요
 
 ### 🟢 CONSTRUCTION PHASE (Per-Unit)
