@@ -27,7 +27,7 @@
 
 | 통합 영역 | 방식 | 비고 |
 |-----------|------|------|
-| REST API | HTTP 호출 | Frontend → Backend (17개 엔드포인트) |
+| REST API | HTTP 호출 | Frontend → Backend (21개 엔드포인트) |
 | SSE | EventSource | Admin Dashboard → Backend SSE 스트림 |
 | 인증 | JWT Bearer Token | 요청 헤더에 토큰 포함 |
 | CORS | FastAPI CORS 미들웨어 | Frontend 도메인 허용 |

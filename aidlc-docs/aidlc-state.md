@@ -3,11 +3,12 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-15T09:00:00Z
-- **Current Stage**: CONSTRUCTION - Functional Design (Next)
+- **Current Stage**: CONSTRUCTION - Code Generation (Next)
 
 ## Execution Plan Summary
-- **Total Stages**: 6 (실행 대상)
-- **Stages to Execute**: Application Design, Units Generation, Functional Design, Code Generation, Build and Test
+- **Total Stages**: 9 (실행 완료 + 실행 예정)
+- **Completed Stages**: Workspace Detection, Requirements Analysis, User Stories, Workflow Planning, Application Design, Units Generation
+- **Remaining Stages**: Functional Design, Code Generation, Build and Test
 - **Stages to Skip**: NFR Requirements, NFR Design, Infrastructure Design (소규모 MVP, 로컬 배포)
 
 ## Workspace State
@@ -31,12 +32,11 @@
 - [x] INCEPTION - Requirements Analysis
 - [x] INCEPTION - User Stories
 - [x] INCEPTION - Workflow Planning
-- [x] INCEPTION - Application Design (EXECUTE)
-- [x] INCEPTION - Units Generation (EXECUTE)
-- [ ] CONSTRUCTION - Functional Design (EXECUTE, per-unit)
-- [ ] CONSTRUCTION - NFR Requirements (SKIP)
-- [ ] CONSTRUCTION - NFR Design (SKIP)
-- [ ] CONSTRUCTION - Infrastructure Design (SKIP)
-- [ ] CONSTRUCTION - Per-Unit Loop
+- [x] INCEPTION - Application Design
+- [x] INCEPTION - Units Generation
+- [x] CONSTRUCTION - Functional Design (EXECUTE, per-unit)
 - [ ] CONSTRUCTION - Code Generation (EXECUTE, per-unit)
 - [ ] CONSTRUCTION - Build and Test (EXECUTE)
+- CONSTRUCTION - NFR Requirements (SKIP)
+- CONSTRUCTION - NFR Design (SKIP)
+- CONSTRUCTION - Infrastructure Design (SKIP)
