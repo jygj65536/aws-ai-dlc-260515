@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from boto3.dynamodb.conditions import Key
+from app.core.storage import Key
 
 from app.core.dynamodb import get_dynamodb_resource
 

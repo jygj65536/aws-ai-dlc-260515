@@ -1,6 +1,6 @@
 """Table 테이블 데이터 접근 레이어."""
 
-from boto3.dynamodb.conditions import Key
+from app.core.storage import Key
 
 from app.core.dynamodb import get_dynamodb_resource
 

@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from boto3.dynamodb.conditions import Attr, Key
+from app.core.storage import Attr, Key
 
 from app.core.dynamodb import get_dynamodb_resource
 

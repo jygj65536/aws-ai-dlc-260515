@@ -1,5 +1,7 @@
 """FastAPI 애플리케이션 진입점."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,10 +10,23 @@ from app.routers import auth, orders, sse
 
 settings = get_settings()
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """앱 시작/종료 이벤트."""
+    # 시작 시 시드 데이터 로드 (인메모리 모드)
+    import os
+    if os.environ.get("USE_DYNAMODB", "false").lower() != "true":
+        from app.core.seed_data import seed
+        seed()
+    yield
+
+
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     description="테이블 주문 시스템 API",
+    lifespan=lifespan,
 )
 
 # CORS 설정 (개발 환경)
