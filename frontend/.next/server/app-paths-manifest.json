@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/customer/orders/page": "app/customer/orders/page.js",
+  "/customer/setup/page": "app/customer/setup/page.js",
+  "/customer/page": "app/customer/page.js",
+  "/customer/cart/page": "app/customer/cart/page.js",
+  "/admin/tables/page": "app/admin/tables/page.js",
+  "/admin/menus/page": "app/admin/menus/page.js",
+  "/admin/login/page": "app/admin/login/page.js"
+}
