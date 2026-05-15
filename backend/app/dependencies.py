@@ -1,77 +1,91 @@
-"""의존성 주입 모듈.
+"""FastAPI 의존성 주입 모듈 (인증/인가 + 서비스)."""
 
-인증 관련 의존성은 feature/auth 브랜치에서 실제 구현 예정.
-현재는 개발/테스트용 스텁으로 제공.
-"""
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from dataclasses import dataclass
-
-from fastapi import Header, HTTPException, status
-
+from app.core.security import decode_access_token
 from app.services.order_service import OrderService
 from app.services.sse_manager import sse_manager, SSEManager
 
-
-@dataclass
-class CurrentUser:
-    """인증된 사용자 컨텍스트."""
-
-    store_id: str
-    user_id: str  # admin username 또는 table_id
-    role: str  # "admin" 또는 "table"
+security_scheme = HTTPBearer()
 
 
 async def get_current_user(
-    authorization: str | None = Header(None),
-) -> CurrentUser:
-    """현재 인증된 사용자 반환 (스텁).
+    credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
+) -> dict:
+    """JWT 토큰을 검증하고 현재 사용자 컨텍스트를 반환한다.
 
-    TODO: feature/auth 브랜치에서 실제 JWT 검증으로 교체
-    현재는 개발 편의를 위해 헤더 없이도 기본 사용자 반환.
+    Returns:
+        {"store_id": str, "role": str, "username"?: str, "table_id"?: str}
+
+    Raises:
+        HTTPException: 401 (토큰 없음/만료/유효하지 않음)
     """
-    if authorization and authorization.startswith("Bearer "):
-        # 실제 JWT 검증은 feature/auth에서 구현
-        # 현재는 토큰이 있으면 기본 admin으로 처리
-        return CurrentUser(
-            store_id="dev-store",
-            user_id="dev-admin",
-            role="admin",
+    token = credentials.credentials
+    payload = decode_access_token(token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 인증 토큰입니다",
         )
-
-    # 개발 모드: 인증 없이 기본 사용자 반환
-    return CurrentUser(
-        store_id="dev-store",
-        user_id="dev-user",
-        role="admin",
-    )
+    return payload
 
 
-async def require_admin(
-    authorization: str | None = Header(None),
-) -> CurrentUser:
-    """관리자 권한 필수 (스텁).
+async def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    """관리자 권한을 요구한다.
 
-    TODO: feature/auth 브랜치에서 실제 구현
+    비즈니스 규칙 AUTH-04: role != "admin" → 403
+
+    Returns:
+        관리자 사용자 컨텍스트
+
+    Raises:
+        HTTPException: 403 (권한 없음)
     """
-    user = await get_current_user(authorization)
-    if user.role != "admin":
+    if current_user.get("role") != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="관리자 권한이 필요합니다",
         )
-    return user
+    return current_user
 
 
-async def require_table(
-    authorization: str | None = Header(None),
-) -> CurrentUser:
-    """테이블 권한 필수 (스텁).
+async def require_table(current_user: dict = Depends(get_current_user)) -> dict:
+    """테이블 권한을 요구한다.
 
-    TODO: feature/auth 브랜치에서 실제 구현
+    비즈니스 규칙 AUTH-05: role != "table" → 403
+
+    Returns:
+        테이블 사용자 컨텍스트
+
+    Raises:
+        HTTPException: 403 (권한 없음)
     """
-    user = await get_current_user(authorization)
-    # 개발 모드에서는 모든 역할 허용
-    return user
+    if current_user.get("role") != "table":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="테이블 권한이 필요합니다",
+        )
+    return current_user
+
+
+def require_store_match(store_id: str, current_user: dict) -> None:
+    """요청의 store_id와 토큰의 store_id 일치를 검증한다.
+
+    비즈니스 규칙 AUTH-06: 매장 격리
+
+    Args:
+        store_id: 요청에 포함된 매장 ID
+        current_user: 토큰에서 추출한 사용자 컨텍스트
+
+    Raises:
+        HTTPException: 403 (매장 불일치)
+    """
+    if current_user.get("store_id") != store_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="해당 매장에 대한 접근 권한이 없습니다",
+        )
 
 
 def get_order_service() -> OrderService:

@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     aws_secret_access_key: str = "local"
     dynamodb_endpoint_url: str = "http://localhost:8000"
 
-    # JWT 설정 (인증 스텁용 - feature/auth에서 실제 구현)
+    # JWT 설정
     jwt_secret_key: str = "dev-secret-key-change-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_hours: int = 16

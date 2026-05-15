@@ -17,66 +17,40 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.core.dynamodb import get_dynamodb_client
 
 
-def create_order_table(client):
-    """Order 테이블 생성."""
+def create_store_table(client):
+    """Store 테이블 생성."""
     try:
         client.create_table(
-            TableName="Order",
+            TableName="Store",
+            KeySchema=[{"AttributeName": "store_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[
+                {"AttributeName": "store_id", "AttributeType": "S"}
+            ],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        print("✅ Store 테이블 생성 완료")
+    except client.exceptions.ResourceInUseException:
+        print("⏭️  Store 테이블 이미 존재")
+
+
+def create_admin_user_table(client):
+    """AdminUser 테이블 생성."""
+    try:
+        client.create_table(
+            TableName="AdminUser",
             KeySchema=[
-                {"AttributeName": "session_id", "KeyType": "HASH"},
-                {"AttributeName": "order_id", "KeyType": "RANGE"},
+                {"AttributeName": "store_id", "KeyType": "HASH"},
+                {"AttributeName": "username", "KeyType": "RANGE"},
             ],
             AttributeDefinitions=[
-                {"AttributeName": "session_id", "AttributeType": "S"},
-                {"AttributeName": "order_id", "AttributeType": "S"},
                 {"AttributeName": "store_id", "AttributeType": "S"},
-                {"AttributeName": "created_at", "AttributeType": "S"},
+                {"AttributeName": "username", "AttributeType": "S"},
             ],
-            GlobalSecondaryIndexes=[
-                {
-                    "IndexName": "StoreOrderIndex",
-                    "KeySchema": [
-                        {"AttributeName": "store_id", "KeyType": "HASH"},
-                        {"AttributeName": "created_at", "KeyType": "RANGE"},
-                    ],
-                    "Projection": {"ProjectionType": "ALL"},
-                    "ProvisionedThroughput": {
-                        "ReadCapacityUnits": 5,
-                        "WriteCapacityUnits": 5,
-                    },
-                }
-            ],
-            ProvisionedThroughput={
-                "ReadCapacityUnits": 5,
-                "WriteCapacityUnits": 5,
-            },
+            BillingMode="PAY_PER_REQUEST",
         )
-        print("✅ Order 테이블 생성 완료")
+        print("✅ AdminUser 테이블 생성 완료")
     except client.exceptions.ResourceInUseException:
-        print("⏭️  Order 테이블 이미 존재")
-
-
-def create_table_session_table(client):
-    """TableSession 테이블 생성."""
-    try:
-        client.create_table(
-            TableName="TableSession",
-            KeySchema=[
-                {"AttributeName": "table_id", "KeyType": "HASH"},
-                {"AttributeName": "session_id", "KeyType": "RANGE"},
-            ],
-            AttributeDefinitions=[
-                {"AttributeName": "table_id", "AttributeType": "S"},
-                {"AttributeName": "session_id", "AttributeType": "S"},
-            ],
-            ProvisionedThroughput={
-                "ReadCapacityUnits": 5,
-                "WriteCapacityUnits": 5,
-            },
-        )
-        print("✅ TableSession 테이블 생성 완료")
-    except client.exceptions.ResourceInUseException:
-        print("⏭️  TableSession 테이블 이미 존재")
+        print("⏭️  AdminUser 테이블 이미 존재")
 
 
 def create_table_table(client):
@@ -115,6 +89,68 @@ def create_table_table(client):
         print("✅ Table 테이블 생성 완료")
     except client.exceptions.ResourceInUseException:
         print("⏭️  Table 테이블 이미 존재")
+
+
+def create_table_session_table(client):
+    """TableSession 테이블 생성."""
+    try:
+        client.create_table(
+            TableName="TableSession",
+            KeySchema=[
+                {"AttributeName": "table_id", "KeyType": "HASH"},
+                {"AttributeName": "session_id", "KeyType": "RANGE"},
+            ],
+            AttributeDefinitions=[
+                {"AttributeName": "table_id", "AttributeType": "S"},
+                {"AttributeName": "session_id", "AttributeType": "S"},
+            ],
+            ProvisionedThroughput={
+                "ReadCapacityUnits": 5,
+                "WriteCapacityUnits": 5,
+            },
+        )
+        print("✅ TableSession 테이블 생성 완료")
+    except client.exceptions.ResourceInUseException:
+        print("⏭️  TableSession 테이블 이미 존재")
+
+
+def create_order_table(client):
+    """Order 테이블 생성."""
+    try:
+        client.create_table(
+            TableName="Order",
+            KeySchema=[
+                {"AttributeName": "session_id", "KeyType": "HASH"},
+                {"AttributeName": "order_id", "KeyType": "RANGE"},
+            ],
+            AttributeDefinitions=[
+                {"AttributeName": "session_id", "AttributeType": "S"},
+                {"AttributeName": "order_id", "AttributeType": "S"},
+                {"AttributeName": "store_id", "AttributeType": "S"},
+                {"AttributeName": "created_at", "AttributeType": "S"},
+            ],
+            GlobalSecondaryIndexes=[
+                {
+                    "IndexName": "StoreOrderIndex",
+                    "KeySchema": [
+                        {"AttributeName": "store_id", "KeyType": "HASH"},
+                        {"AttributeName": "created_at", "KeyType": "RANGE"},
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                    "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 5,
+                        "WriteCapacityUnits": 5,
+                    },
+                }
+            ],
+            ProvisionedThroughput={
+                "ReadCapacityUnits": 5,
+                "WriteCapacityUnits": 5,
+            },
+        )
+        print("✅ Order 테이블 생성 완료")
+    except client.exceptions.ResourceInUseException:
+        print("⏭️  Order 테이블 이미 존재")
 
 
 def create_order_history_table(client):
@@ -163,9 +199,11 @@ def main():
 
     client = get_dynamodb_client()
 
-    create_order_table(client)
-    create_table_session_table(client)
+    create_store_table(client)
+    create_admin_user_table(client)
     create_table_table(client)
+    create_table_session_table(client)
+    create_order_table(client)
     create_order_history_table(client)
 
     print()

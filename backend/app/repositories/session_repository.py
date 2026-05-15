@@ -1,20 +1,55 @@
 """TableSession 테이블 데이터 접근 레이어."""
 
+from datetime import datetime, timezone
 from decimal import Decimal
 
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Attr, Key
 
 from app.core.dynamodb import get_dynamodb_resource
+
+TABLE_NAME = "TableSession"
+
+
+def _get_table():
+    return get_dynamodb_resource().Table(TABLE_NAME)
+
+
+# --- 모듈 레벨 함수 (auth_service에서 사용) ---
+
+
+def get_active_session(table_id: str) -> dict | None:
+    """테이블의 활성 세션을 조회한다.
+
+    활성 세션: status="active" AND expires_at > 현재시각
+    """
+    table = _get_table()
+    now = datetime.now(timezone.utc).isoformat()
+
+    response = table.query(
+        KeyConditionExpression=Key("table_id").eq(table_id),
+        FilterExpression=Attr("status").eq("active") & Attr("expires_at").gt(now),
+        ScanIndexForward=False,
+        Limit=1,
+    )
+    items = response.get("Items", [])
+    return items[0] if items else None
+
+
+def get_session_by_id(table_id: str, session_id: str) -> dict | None:
+    """세션 ID로 세션을 조회한다."""
+    table = _get_table()
+    response = table.get_item(Key={"table_id": table_id, "session_id": session_id})
+    return response.get("Item")
+
+
+# --- 클래스 기반 (order_service에서 사용) ---
 
 
 class SessionRepository:
     """DynamoDB TableSession 테이블 접근."""
 
-    TABLE_NAME = "TableSession"
-
     def __init__(self):
-        self._db = get_dynamodb_resource()
-        self._table = self._db.Table(self.TABLE_NAME)
+        self._table = _get_table()
 
     def create(self, session: dict) -> dict:
         """세션 생성."""

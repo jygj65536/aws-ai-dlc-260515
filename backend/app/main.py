@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import orders, sse
+from app.routers import auth, orders, sse
 
 settings = get_settings()
 
@@ -24,6 +24,7 @@ app.add_middleware(
 )
 
 # 라우터 등록
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(orders.router, prefix="/api", tags=["orders"])
 app.include_router(sse.router, prefix="/api", tags=["sse"])
 
